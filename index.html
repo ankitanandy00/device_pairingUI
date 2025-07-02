@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=390, height=844, user-scalable=no">
+    <title>device-Pairing</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: radial-gradient(circle at center, #15012d, #26004d);
+            font-family: 'poppins', sans-serif;
+            color: white;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .phone-frame {
+            width: 390px;
+            height: 844px;
+            background: radial-gradient(circle at center, #42078a, #000000);
+            border: 8px solid #444444;
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .scanner {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 2px dashed #aaa;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .bluetooth-wrapper {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bluetooth-icon,
+        .magnify-icon {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            fill: skyblue;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .magnify-icon {
+            opacity: 0;
+        }
+
+        .scanner:hover .bluetooth-icon {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .scanner:hover .magnify-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .glow {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: rgba(135, 206, 250, 0.2);
+            border-radius: 50%;
+            animation: pulseGlow 2s infinite ease-in-out;
+            z-index: 0;
+        }
+
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            50% {
+                transform: scale(1.3);
+                opacity: 0.7;
+            }
+        }
+
+        button {
+            background: #444;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px;
+            font-size: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background: #777;
+            cursor: not-allowed;
+        }
+
+        .device-card {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .device-img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .device-name {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .progress-ring {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 8px solid #888;
+            border-top-color: transparent;
+            animation: spin 1.5s linear infinite;
+        }
+
+        .progress-ring.success {
+            border-color: green;
+        }
+
+        .progress-ring.fail {
+            border-color: red;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="phone-frame">
+        <!-- Screen 1: Looking -->
+        <div class="screen active" id="screen-looking">
+            <h2>Looking for your device ...</h2>
+            <div class="scanner">
+                <div class="glow"></div>
+                <div class="bluetooth-wrapper">
+                    <svg class="bluetooth-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M17 7l-5-5v7.586L7.707 5.293 6.293 6.707 11.586 12l-5.293 5.293 1.414 1.414L12 13.414V21l5-5-4.293-4.293L17 7z" />
+                    </svg>
+                    <svg class="magnify-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16a6.471 6.471 0 004.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C8.01 14 6 11.99 6 9.5S8.01 5 10.5 5 15 7.01 15 9.5 12.99 14 10.5 14z" />
+                    </svg>
+                </div>
+            </div>
+            <button id="enable-bluetooth">Turn on Bluetooth</button>
+            <button id="scan-btn" disabled>Scan</button>
+        </div>
+
+        <!-- Screen 2: Device Found -->
+        <div class="screen" id="screen-found">
+            <h2 id="device-type">1 Device Found</h2>
+            <div class="device-name" id="device-name">Device Name</div>
+            <p id="device-mac">MAC Address</p>
+            <div class="device-card">
+                <img class="device-img" id="device-img" src="" alt="Device Image">
+            </div>
+            <button id="pair-btn">Start Pairing</button>
+        </div>
+
+        <!-- Screen 3: Pairing -->
+        <div class="screen" id="screen-pairing">
+            <h2>Pairing...</h2>
+            <div class="progress-ring" id="progressRing"></div>
+            <p id="status-msg">Connecting...</p>
+        </div>
+
+        <!-- Screen 4: Success -->
+        <div class="screen" id="screen-success">
+            <h2>✅ Paired Successfully!</h2>
+            <p>Your device is now connected.</p>
+            <button onclick="location.reload()">Done</button>
+        </div>
+
+        <!-- Screen 5: Failure -->
+        <div class="screen" id="screen-fail">
+            <h2>❌ Pairing Failed</h2>
+            <p>Try again or get help below.</p>
+            <button onclick="goTo('screen-looking')">Try Again</button>
+            <button>Help</button>
+        </div>
+    </div>
+
+    <audio id="pairing-sound" src="audio/bluetooth-scan.mp3" preload="auto"></audio>
+
+    <script>
+        const devices = [
+            { type: "Smartwatch", name: "NoiseFit Evolve 3", mac: "D6:34:0B:D2:85:67", img: "images/noisefit.png" },
+            { type: "Earbuds", name: "OnePlus Buds Z2", mac: "E4:91:A7:2C:39:77", img: "images/oneplus buds.png" },
+            { type: "Speaker", name: "JBL Flip 5", mac: "F8:BC:92:AA:4C:19", img: "images/JBL.png" },
+            { type: "Headphones", name: "boAt Rockerz 450", mac: "A1:33:5F:62:B4:FF", img: "images/Rockerz_450_Pro_14_1000x.webp" },
+            { type: "Fitness Band", name: "Mi Band 6", mac: "D3:22:8B:AA:99:11", img: "images/mi.png" }
+        ];
+
+        const screens = ['screen-looking', 'screen-found', 'screen-pairing', 'screen-success', 'screen-fail'];
+        const scanBtn = document.getElementById('scan-btn');
+        const enableBtn = document.getElementById('enable-bluetooth');
+        const pairBtn = document.getElementById('pair-btn');
+        const progressRing = document.getElementById('progressRing');
+        const statusMsg = document.getElementById('status-msg');
+
+        function goTo(id) {
+            screens.forEach(s => document.getElementById(s).classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        enableBtn.addEventListener('click', () => {
+            enableBtn.textContent = 'Bluetooth Enabled ✓';
+            enableBtn.disabled = true;
+            scanBtn.disabled = false;
+        });
+
+        scanBtn.addEventListener('click', () => {
+            document.getElementById('pairing-sound').play();
+
+            const randomDevice = devices[Math.floor(Math.random() * devices.length)];
+            document.getElementById("device-type").textContent = `${randomDevice.type} Found`;
+            document.getElementById("device-name").textContent = randomDevice.name;
+            document.getElementById("device-mac").textContent = `MAC ${randomDevice.mac}`;
+            document.getElementById("device-img").src = randomDevice.img;
+            document.getElementById("device-img").alt = randomDevice.name;
+
+            goTo('screen-found');
+        });
+
+        pairBtn.addEventListener('click', () => {
+            goTo('screen-pairing');
+            progressRing.classList.remove('success', 'fail');
+            statusMsg.textContent = 'Connecting...';
+
+            setTimeout(() => {
+                const isSuccess = Math.random() > 0.4;
+                progressRing.classList.add(isSuccess ? 'success' : 'fail');
+                statusMsg.textContent = isSuccess ? 'Connected!' : 'Failed to pair.';
+
+                setTimeout(() => {
+                    goTo(isSuccess ? 'screen-success' : 'screen-fail');
+                }, 1500);
+            }, 3000);
+        });
+    </script>
+
+</body>
+
+</html>
+
